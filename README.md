@@ -1,16 +1,18 @@
-# claude-audit
+# claude-config-doctor
 
-> A read-only auditor for your [Claude Code](https://claude.com/claude-code) environment.
+> A read-only health check for your [Claude Code](https://claude.com/claude-code) configuration.
 
-Claude Code setups grow organically. Rules pile up, agents start to overlap, permissions get loose, and your context window quietly fills with content you forgot you wrote six months ago.
+Like `brew doctor` or `flutter doctor`, but for your Claude Code setup.
 
-`claude-audit` takes a snapshot of your `~/.claude/` directory and your current project, then hands you back a structured report with a score out of 10 and concrete things to fix — sorted by priority.
+Configurations grow organically. Rules pile up, agents start to overlap, permissions get loose, and your context window quietly fills with content you forgot you wrote six months ago.
+
+`claude-config-doctor` takes a snapshot of your `~/.claude/` directory and your current project, then hands you back a structured health report with a score out of 10 and concrete things to fix — sorted by priority.
 
 No data leaves your machine. No file is ever modified.
 
 ## What it checks
 
-| Area | What's audited |
+| Area | What's diagnosed |
 |---|---|
 | **Base structure** | `CLAUDE.md`, `settings.json`, memory system |
 | **Rules & context weight** | What's loaded into every conversation, and how much |
@@ -24,26 +26,26 @@ Each criterion is scored 0–3, then aggregated into a final `X.X / 10`. Recomme
 
 ```bash
 mkdir -p ~/.claude/agents
-curl -o ~/.claude/agents/claude-audit.md \
-  https://raw.githubusercontent.com/mister-no-one/claude-audit/main/claude-audit.md
+curl -o ~/.claude/agents/claude-config-doctor.md \
+  https://raw.githubusercontent.com/mister-no-one/claude-config-doctor/main/claude-config-doctor.md
 ```
 
-Or just drop `claude-audit.md` into `~/.claude/agents/` manually.
+Or just drop `claude-config-doctor.md` into `~/.claude/agents/` manually.
 
 ## Usage
 
 In any Claude Code session, ask:
 
 ```
-Run a full audit of my Claude Code environment.
+Run a full health check on my Claude Code configuration.
 ```
 
-Claude will dispatch the `claude-audit` agent automatically. The audit takes about 15–30 seconds and produces a single markdown report you can save, share, or act on directly.
+Claude will dispatch the `claude-config-doctor` agent automatically. The check takes about 15–30 seconds and produces a single markdown report you can save, share, or act on directly.
 
 ## Example output
 
 ```markdown
-# Claude Code Environment Audit
+# Claude Code Configuration Health Check
 
 **Date:** 2026-04-07
 **User:** jane.doe
@@ -73,9 +75,9 @@ of which are project-specific and should live in the project's CLAUDE.md.
 
 ## Guarantees
 
-- **Read-only.** The agent has access to `Read`, `Glob`, `Grep` and `Bash`, but its instructions forbid any modification. You can verify this in `claude-audit.md`.
+- **Read-only.** The agent has access to `Read`, `Glob`, `Grep` and `Bash`, but its instructions forbid any modification. You can verify this in `claude-config-doctor.md`.
 - **Local.** No network calls, no telemetry, no external services.
-- **No secrets.** The audit explicitly skips `.credentials.json` and similar files.
+- **No secrets.** The check explicitly skips `.credentials.json` and similar files.
 
 ## Requirements
 

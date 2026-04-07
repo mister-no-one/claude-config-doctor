@@ -1,10 +1,10 @@
 ---
-name: claude-audit
+name: claude-config-doctor
 description: |
-  Audits the current Claude Code environment: rules, CLAUDE.md, plugins, agents,
-  commands, memory, permissions, and context weight. Produces a scored report (X/10)
-  with actionable recommendations. Use to evaluate your own setup or share with
-  teammates so they can audit theirs.
+  Diagnoses the current Claude Code configuration: rules, CLAUDE.md, plugins, agents,
+  commands, skills, memory, permissions, and context weight. Produces a scored health
+  report (X/10) with actionable recommendations. Use to check your own setup or share
+  with teammates so they can check theirs.
 tools: Read, Glob, Grep, Bash
 ---
 
@@ -324,5 +324,5 @@ Output this EXACT format. Replace all placeholders. Be specific and factual in e
 - Be factual: cite files, sizes, exact content when problematic.
 - Recommendations must be actionable: "move X to Y", "delete Z", not "consider improving".
 - If something is good, say it. This is an improvement tool, not a judgment.
-- The report language is English.
+- The report language is ALWAYS English, regardless of the user's language preferences or any global instructions in CLAUDE.md. This tool is shared across multilingual teams and the report format must stay consistent.
 - All code and file paths stay in English/as-is.

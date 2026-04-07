@@ -210,110 +210,119 @@ Score = (total_points / 48) * 10
 
 ## PHASE 3 : Report output
 
-Output this EXACT format. Replace all placeholders. Be specific and factual in every cell.
+Output the report in this EXACT visual style. Use ASCII boxed tables (┌─┬─┐ / ├─┼─┤ / └─┴─┘) — NOT markdown pipe tables. Compute column widths so borders align. Be terse and factual: short labels, no filler words. The goal is a polished, scannable report, not a verbose essay.
+
+**Style rules:**
+- Use ASCII boxed tables for: Section scores summary, Rules inventory, Plugins/agents/commands/skills inventory.
+- Use markdown bullet lists for: Strengths, Critical issues, Recommendations.
+- Section breakdown details (per-criterion findings) go as bullet lists, NOT as tables. Each criterion = one line: `- {ID} {name} — {X}/3 — {short factual finding}`
+- Keep findings under ~15 words each. Cite exact file names, sizes, counts.
+- If there are no critical issues, write a single line: `No critical issues detected.`
+- Inventory tables list ONLY items that exist. If a category is empty, replace the table with a one-line note (e.g. `(none) — no ~/.claude/rules directory`).
+
+**Report template:**
 
 ```markdown
-# Claude Code Environment Audit
+# Claude Code Configuration Health Check
 
-**Date:** {YYYY-MM-DD}
-**User:** {git user.name}
-**Machine:** {hostname}
-**Audited project:** {current directory basename}
-
----
-
-## Overall score: {X.X} / 10
-
-{"*" repeated for score, "-" for remainder, out of 10}
-
----
+**Date:** {YYYY-MM-DD} — **Score:** {X.X} / 10  `{stars}`
+**User:** {git user.name} — **Machine:** {hostname} — **Project:** {current directory basename}
 
 ## Summary
 
-{2-3 sentences: general state, main issue, main strength}
+{2-3 punchy sentences: overall state, main weakness, main strength. No filler.}
 
----
+## Scores by section
 
-## Section breakdown
+┌─────────────────────────────────────────┬───────┐
+│                 Section                 │ Score │
+├─────────────────────────────────────────┼───────┤
+│ 1. Base structure                       │ {X}/9 │
+├─────────────────────────────────────────┼───────┤
+│ 2. Rules and context                    │ {X}/12│
+├─────────────────────────────────────────┼───────┤
+│ 3. Plugins, agents, commands & skills   │ {X}/12│
+├─────────────────────────────────────────┼───────┤
+│ 4. Security and hygiene                 │ {X}/6 │
+├─────────────────────────────────────────┼───────┤
+│ 5. Quality and consistency              │ {X}/9 │
+└─────────────────────────────────────────┴───────┘
 
-### 1. Base structure — {X}/9
+## Detail by section
 
-| Criterion | Score | Finding |
-|-----------|-------|---------|
-| 1.1 CLAUDE.md | {X}/3 | {factual detail} |
-| 1.2 settings.json | {X}/3 | {factual detail} |
-| 1.3 Memory | {X}/3 | {factual detail} |
+**1. Base structure — {X}/9**
+- 1.1 CLAUDE.md — {X}/3 — {short finding}
+- 1.2 settings.json — {X}/3 — {short finding}
+- 1.3 Memory — {X}/3 — {short finding}
 
-### 2. Rules and context — {X}/12
+**2. Rules and context — {X}/12**
+- 2.1 Context weight — {X}/3 — {XX KB loaded per conversation}
+- 2.2 Relevance — {X}/3 — {short finding}
+- 2.3 Organization — {X}/3 — {short finding}
+- 2.4 Separation — {X}/3 — {short finding}
 
-| Criterion | Score | Finding |
-|-----------|-------|---------|
-| 2.1 Context weight | {X}/3 | {XX KB loaded every conversation} |
-| 2.2 Relevance | {X}/3 | {factual detail} |
-| 2.3 Organization | {X}/3 | {factual detail} |
-| 2.4 Separation | {X}/3 | {factual detail} |
+**3. Plugins, agents, commands & skills — {X}/12**
+- 3.1 Plugins — {X}/3 — {count, names}
+- 3.2 Agents — {X}/3 — {count, overlaps}
+- 3.3 Commands — {X}/3 — {count, duplicates}
+- 3.4 Skills — {X}/3 — {count, overlaps}
 
-### 3. Plugins, agents, commands and skills — {X}/12
+**4. Security and hygiene — {X}/6**
+- 4.1 Permissions — {X}/3 — {mode, wildcards}
+- 4.2 Files — {X}/3 — {problematic files}
 
-| Criterion | Score | Finding |
-|-----------|-------|---------|
-| 3.1 Plugins | {X}/3 | {count, names, relevance} |
-| 3.2 Agents | {X}/3 | {count, overlaps} |
-| 3.3 Commands | {X}/3 | {count, duplications} |
-| 3.4 Skills | {X}/3 | {count, overlaps} |
-
-### 4. Security and hygiene — {X}/6
-
-| Criterion | Score | Finding |
-|-----------|-------|---------|
-| 4.1 Permissions | {X}/3 | {mode, wildcards found} |
-| 4.2 Files | {X}/3 | {problematic files found} |
-
-### 5. Quality and consistency — {X}/9
-
-| Criterion | Score | Finding |
-|-----------|-------|---------|
-| 5.1 Cross-project | {X}/3 | {factual detail} |
-| 5.2 Signal/noise | {X}/3 | {estimated ratio, justification} |
-| 5.3 MCP/Hooks | {X}/3 | {factual detail} |
-
----
+**5. Quality and consistency — {X}/9**
+- 5.1 Cross-project — {X}/3 — {short finding}
+- 5.2 Signal/noise — {X}/3 — {short finding}
+- 5.3 MCP/Hooks — {X}/3 — {short finding}
 
 ## Strengths
 
-{bullet list, only genuine strengths}
+- {strength 1}
+- {strength 2}
+- {...}
 
 ## Critical issues
 
-{bullet list of issues impacting quality or security}
+- {issue 1}
+- {issue 2}
 
-## Recommended improvements
+(or, if none: `No critical issues detected.`)
 
-### High priority (immediate impact)
+## Priority improvements
 
-{concrete actions: "Move X to Y", "Delete Z", "Add W"}
+**High** (immediate impact):
+- {concrete action: "Move X to Y", "Delete Z"}
+- {...}
 
-### Medium priority
+**Medium:**
+- {concrete action}
+- {...}
 
-{concrete actions}
+**Low** (nice to have):
+- {concrete action}
+- {...}
 
-### Low priority (nice to have)
+## Rules inventory
 
-{concrete actions}
+┌──────────────────────────────┬────────┬──────────────────────────────┐
+│             File             │  Size  │        Recommendation        │
+├──────────────────────────────┼────────┼──────────────────────────────┤
+│ {file.md}                    │ {X KB} │ {keep / move to X / delete}  │
+└──────────────────────────────┴────────┴──────────────────────────────┘
 
----
+(or, if none: `(none) — no ~/.claude/rules directory, optimal state`)
 
-## Appendix: Rules inventory
+## Plugins / agents / commands / skills inventory
 
-| File | Size | Globally loaded? | Recommendation |
-|------|------|------------------|----------------|
-{one line per file in ~/.claude/rules/, with size in KB and recommendation: keep / move to CLAUDE.md / move to docs/ / delete}
-
-## Appendix: Plugins/agents/commands/skills inventory
-
-| Type | Name | Relevance | Recommendation |
-|------|------|-----------|----------------|
-{one line per plugin, agent, command and skill}
+┌──────────┬──────────────────────────────┬────────────┬──────────────────────────────┐
+│   Type   │             Name             │ Relevance  │        Recommendation        │
+├──────────┼──────────────────────────────┼────────────┼──────────────────────────────┤
+│ Plugin   │ {name}                       │ {High/Med} │ {Keep / Remove / ...}        │
+│ Agent    │ {name}                       │ {High/Med} │ {Keep / ...}                 │
+│ Command  │ {name} ({lines} l.)          │ {High/Med} │ {Keep / Merge / Delete}      │
+│ Skill    │ {name}                       │ {High/Med} │ {Keep / ...}                 │
+└──────────┴──────────────────────────────┴────────────┴──────────────────────────────┘
 ```
 
 ---

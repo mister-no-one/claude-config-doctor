@@ -19,8 +19,17 @@ No data leaves your machine. No file is ever modified.
 | **Plugins, agents, commands & skills** | Relevance, overlap, duplication |
 | **Security & hygiene** | Dangerous permissions, sensitive files, junk |
 | **Quality & consistency** | Signal-to-noise ratio, MCP & hooks setup |
+| **Integrity & cross-references** | Broken refs, dead permissions, stub commands, missing plugins, broken hooks |
 
 Each criterion is scored 0–3, then aggregated into a final `X.X / 10`. Recommendations come bucketed as **high / medium / low** priority, each one phrased as a concrete action — *"Move X to Y"*, *"Delete Z"*, not *"consider improving"*.
+
+## What makes it different
+
+- **A real score on /10** — not just a list of warnings. You know if your setup is healthy at a glance.
+- **Integrity checks** — finds broken slash commands, dead permissions, stub duplicates, hooks pointing to missing scripts. Goes beyond counting and linting.
+- **Actionable, not preachy** — every recommendation is a concrete imperative ("Delete X", "Move Y to Z"), bucketed by priority.
+- **One-click remediation** — the report ends with a copy-paste-ready prompt that walks through your high-priority fixes interactively.
+- **Zero ceremony** — two `curl` commands and a `/healthcheck` slash command. No marketplace, no plugin registration.
 
 ## Installation
 
@@ -52,29 +61,46 @@ The check takes about 15–30 seconds and produces a single markdown report you 
 
 ## Example output
 
-```markdown
+```text
 # Claude Code Configuration Health Check
 
-**Date:** 2026-04-07 — **Score:** 7.3 / 10  `*******---`
-**User:** jane.doe — **Project:** my-app
+Date: 2026-04-07 — Score: 7.3 / 10  *******---
+User: jane.doe — Project: my-app
 
-## Summary
+## Scores by section
 
-Solid setup with a clean memory system and well-scoped agents. Main issue:
-context weight is high (~95 KB of rules loaded every conversation), several
-of which are project-specific and should live in the project's CLAUDE.md.
+┌─────────────────────────────────────────┬───────┐
+│                 Section                 │ Score │
+├─────────────────────────────────────────┼───────┤
+│ 1. Base structure                       │ 7/9   │
+│ 2. Rules and context                    │ 9/12  │
+│ 3. Plugins, agents, commands & skills   │ 9/12  │
+│ 4. Security and hygiene                 │ 5/6   │
+│ 5. Quality and consistency              │ 7/9   │
+│ 6. Integrity & cross-references         │ 4/6   │
+└─────────────────────────────────────────┴───────┘
 
 ## Critical issues
 - `Bash(*)` wildcard found in settings.local.json
-- 3 rules in ~/.claude/rules/ are specific to a single project
+- /audit slash command references missing agent `claude-audit`
+- 2 dead Bash() permissions referencing deleted paths
 
 ## Priority improvements
 
 **High** (immediate impact):
 - Remove `Bash(*)` from settings.local.json, replace with scoped permissions
+- Delete ~/.claude/commands/audit.md (broken reference)
 - Move ~/.claude/rules/project-conventions.md into the project's CLAUDE.md
-...
+
+## Next step — apply the fixes
+
+To act on this report immediately, copy-paste the prompt below into Claude Code.
+It will execute the high-priority fixes one by one and show you each diff before applying.
+
+> Apply the high-priority fixes from the latest healthcheck report...
 ```
+
+> 💡 Want a real screenshot? Run `/healthcheck` once and replace this code block with an image.
 
 ## Guarantees
 

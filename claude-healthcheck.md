@@ -149,6 +149,70 @@ for k in hooks: print(f'  - {k}')
 fi
 ```
 
+### Batch 5 — Cross-reference & integrity checks
+
+These checks find broken references, dead artifacts, and contradictions that simple counting misses. Findings here go straight into Critical issues / High priority.
+
+```bash
+# 5a. Slash commands referencing non-existent agents
+# For each command file, extract agent names mentioned in backticks and verify the agent file exists.
+for cmd in ~/.claude/commands/*.md; do
+    [ -f "$cmd" ] || continue
+    grep -oE '`[a-z][a-z0-9_-]+`' "$cmd" 2>/dev/null | tr -d '`' | while read -r ref; do
+        if [ -f ~/.claude/agents/"$ref".md ] || [ -f ~/.claude/agents/"$ref" ]; then
+            : # found
+        elif echo "$ref" | grep -qE '^(claude|agent|skill)' && [ ! -f ~/.claude/agents/"$ref".md ]; then
+            echo "BROKEN_REF: $(basename "$cmd") references missing agent '$ref'"
+        fi
+    done
+done
+
+# 5b. Dead Bash() permissions referencing paths that no longer exist
+if command -v jq >/dev/null 2>&1; then
+    jq -r '.permissions.allow[]? | select(startswith("Bash(")) | .' ~/.claude/settings.local.json 2>/dev/null | while read -r rule; do
+        # Extract paths inside the Bash(...) rule (anything that looks like ~/... or /...)
+        echo "$rule" | grep -oE '(~|\$HOME)?/[a-zA-Z0-9._/-]+' | while read -r p; do
+            expanded="${p/#\~/$HOME}"
+            expanded="${expanded/#\$HOME/$HOME}"
+            # Only check paths that look like real files (not glob patterns)
+            if [ -n "$expanded" ] && [ "${expanded#*\*}" = "$expanded" ] && [ ! -e "$expanded" ]; then
+                echo "DEAD_PERM: $rule  →  path '$expanded' does not exist"
+            fi
+        done
+    done
+fi
+
+# 5c. Duplicate / near-duplicate slash commands (very small files that likely wrap each other)
+find ~/.claude/commands -maxdepth 1 -type f -name "*.md" 2>/dev/null | while read -r f; do
+    lines=$(wc -l < "$f")
+    if [ "$lines" -lt 10 ]; then
+        echo "STUB_CMD: $(basename "$f") ($lines lines) — likely a thin wrapper, check for duplication"
+    fi
+done
+
+# 5d. enabledPlugins referencing plugins not actually installed
+if command -v jq >/dev/null 2>&1; then
+    jq -r '.enabledPlugins // {} | to_entries[] | select(.value == true) | .key' ~/.claude/settings.json 2>/dev/null | while read -r plugin; do
+        plugin_name="${plugin%%@*}"
+        if [ -n "$plugin_name" ] && [ ! -d ~/.claude/plugins/repos ] && [ ! -d ~/.claude/plugins/marketplace ]; then
+            echo "MISSING_PLUGIN: '$plugin' enabled but ~/.claude/plugins/ has no repos/marketplace"
+        fi
+    done
+fi
+
+# 5e. Hooks referencing scripts/files that don't exist
+if command -v jq >/dev/null 2>&1; then
+    jq -r '.hooks // {} | to_entries[] | .value[]?.hooks[]?.command // empty' ~/.claude/settings.json 2>/dev/null | while read -r hookcmd; do
+        # Extract script paths from hook commands
+        echo "$hookcmd" | grep -oE '(~|\$HOME)?/[a-zA-Z0-9._/-]+\.(sh|py|js|ts)' | while read -r script; do
+            expanded="${script/#\~/$HOME}"
+            expanded="${expanded/#\$HOME/$HOME}"
+            [ -n "$expanded" ] && [ ! -f "$expanded" ] && echo "BROKEN_HOOK: command references missing script '$expanded'"
+        done
+    done
+fi
+```
+
 ---
 
 ## PHASE 2 : Scoring
@@ -200,10 +264,19 @@ Score each criterion on 0-3 scale:
 | 5.2 | Signal-to-noise ratio | 0= <30% signal, 1=30-50%, 2=50-80%, 3= >80% useful content |
 | 5.3 | MCP & hooks | 0=broken config, 1=none when needed, 2=partial, 3=well configured or correctly absent |
 
+### Section 6: Integrity & cross-references (max 6)
+
+Based on Batch 5 findings. Each broken reference, dead artifact, or stub duplicate counts as one issue.
+
+| ID | Criterion | How to score |
+|----|-----------|-------------|
+| 6.1 | Reference integrity | 0=many broken refs (3+ BROKEN_REF/MISSING_PLUGIN/BROKEN_HOOK), 1=2 broken, 2=1 broken, 3=zero broken |
+| 6.2 | Dead artifacts | 0=many dead permissions/stubs (5+ DEAD_PERM/STUB_CMD), 1=3-4, 2=1-2, 3=zero dead artifacts |
+
 ### Final score
 
 ```
-Score = (total_points / 48) * 10
+Score = (total_points / 54) * 10
 ```
 
 ---
@@ -246,6 +319,8 @@ Output the report in this EXACT visual style. Use ASCII boxed tables (┌─┬�
 │ 4. Security and hygiene                 │ {X}/6 │
 ├─────────────────────────────────────────┼───────┤
 │ 5. Quality and consistency              │ {X}/9 │
+├─────────────────────────────────────────┼───────┤
+│ 6. Integrity & cross-references         │ {X}/6 │
 └─────────────────────────────────────────┴───────┘
 
 ## Detail by section
@@ -275,6 +350,10 @@ Output the report in this EXACT visual style. Use ASCII boxed tables (┌─┬�
 - 5.1 Cross-project — {X}/3 — {short finding}
 - 5.2 Signal/noise — {X}/3 — {short finding}
 - 5.3 MCP/Hooks — {X}/3 — {short finding}
+
+**6. Integrity & cross-references — {X}/6**
+- 6.1 Reference integrity — {X}/3 — {count of broken refs/missing plugins/broken hooks}
+- 6.2 Dead artifacts — {X}/3 — {count of dead permissions/stub commands}
 
 ## Strengths
 
@@ -323,7 +402,21 @@ Output the report in this EXACT visual style. Use ASCII boxed tables (┌─┬�
 │ Command  │ {name} ({lines} l.)          │ {High/Med} │ {Keep / Merge / Delete}      │
 │ Skill    │ {name}                       │ {High/Med} │ {Keep / ...}                 │
 └──────────┴──────────────────────────────┴────────────┴──────────────────────────────┘
+
+## Next step — apply the fixes
+
+To act on this report immediately, copy-paste the prompt below into Claude Code. It will execute the high-priority fixes one by one and show you each diff before applying.
+
+> Apply the high-priority fixes from the latest healthcheck report. For each fix:
+> 1. Show me what you're about to change
+> 2. Wait for my confirmation
+> 3. Apply only after I say yes
+>
+> Specifically, the fixes to apply are:
+> {list each High priority recommendation as a numbered bullet, verbatim from the "Priority improvements > High" section above}
 ```
+
+If there are no high-priority fixes, omit the "Next step" section entirely. Never generate a remediation prompt for medium/low items unless explicitly asked.
 
 ---
 

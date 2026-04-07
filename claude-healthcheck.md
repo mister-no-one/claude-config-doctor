@@ -276,18 +276,23 @@ Score each criterion on 0-3 scale:
 
 ### Section 6: Integrity & cross-references (max 6)
 
-Based on Batch 5 findings. Each broken reference, dead artifact, or stub duplicate counts as one issue.
+Based STRICTLY on Batch 5 findings. You MUST count tag occurrences from Batch 5 output and apply the rubric below verbatim. Section 6 has TWO sub-criteria, each scored /3, totaling /6 — do NOT collapse them.
 
-| ID | Criterion | How to score |
-|----|-----------|-------------|
-| 6.1 | Reference integrity | 0=many broken refs (3+ BROKEN_REF/MISSING_PLUGIN/BROKEN_HOOK), 1=2 broken, 2=1 broken, 3=zero broken |
-| 6.2 | Dead artifacts | 0=many dead permissions/stubs (5+ DEAD_PERM/STUB_CMD), 1=3-4, 2=1-2, 3=zero dead artifacts |
+**Severity model:** Truly broken artifacts (BROKEN_REF / BROKEN_HOOK / MISSING_PLUGIN) hurt more than stale cruft (DEAD_PERM / STUB_CMD). Cruft is annoying, not dangerous.
 
-### Final score
+| ID | Criterion | Counts | How to score |
+|----|-----------|--------|-------------|
+| 6.1 | Reference integrity | BROKEN_REF + BROKEN_HOOK + MISSING_PLUGIN | 0=3+ broken, 1=2 broken, 2=1 broken, 3=zero broken |
+| 6.2 | Dead artifacts (cruft) | DEAD_PERM + STUB_CMD | 0=10+ dead, 1=6-9 dead, 2=3-5 dead, 3=0-2 dead |
+
+### Final score — MANDATORY MATH
 
 ```
-Score = (total_points / 54) * 10
+Total possible = 9 + 12 + 12 + 6 + 9 + 6 = 54
+Score on 10 = (total_points / 54) * 10
 ```
+
+You MUST display the total as `XX / 54` in the report (NOT /48 — that was the old total before Section 6 was added). The "Scores by section" ASCII table MUST include a row for Section 6 with `/6` (not /3). The detail breakdown MUST show both 6.1 and 6.2 sub-scores separately.
 
 ---
 

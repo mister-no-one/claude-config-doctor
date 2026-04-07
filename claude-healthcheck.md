@@ -1,10 +1,10 @@
 ---
-name: claude-config-doctor
+name: claude-healthcheck
 description: |
-  Diagnoses the current Claude Code configuration: rules, CLAUDE.md, plugins, agents,
-  commands, skills, memory, permissions, and context weight. Produces a scored health
-  report (X/10) with actionable recommendations. Use to check your own setup or share
-  with teammates so they can check theirs.
+  Runs a health check on the current Claude Code configuration: rules, CLAUDE.md,
+  plugins, agents, commands, skills, memory, permissions, and context weight. Produces
+  a scored report (X/10) with actionable recommendations. Use to check your own setup
+  or share with teammates so they can check theirs.
 tools: Read, Glob, Grep, Bash
 ---
 

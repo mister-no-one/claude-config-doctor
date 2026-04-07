@@ -24,23 +24,31 @@ Each criterion is scored 0–3, then aggregated into a final `X.X / 10`. Recomme
 
 ## Installation
 
+Two files: the agent (the brain) and the slash command (the trigger).
+
 ```bash
-mkdir -p ~/.claude/agents
+mkdir -p ~/.claude/agents ~/.claude/commands
+
 curl -o ~/.claude/agents/claude-config-doctor.md \
   https://raw.githubusercontent.com/mister-no-one/claude-config-doctor/main/claude-config-doctor.md
+
+curl -o ~/.claude/commands/doctor.md \
+  https://raw.githubusercontent.com/mister-no-one/claude-config-doctor/main/commands/doctor.md
 ```
 
-Or just drop `claude-config-doctor.md` into `~/.claude/agents/` manually.
+Or copy both files manually:
+- `claude-config-doctor.md` → `~/.claude/agents/`
+- `commands/doctor.md` → `~/.claude/commands/`
 
 ## Usage
 
-In any Claude Code session, ask:
+In any Claude Code session, type:
 
 ```
-Run a full health check on my Claude Code configuration.
+/doctor
 ```
 
-Claude will dispatch the `claude-config-doctor` agent automatically. The check takes about 15–30 seconds and produces a single markdown report you can save, share, or act on directly.
+The check takes about 15–30 seconds and produces a single markdown report you can save, share, or act on directly.
 
 ## Example output
 
